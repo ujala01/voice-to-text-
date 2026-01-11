@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Speech Recognition Test</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  button {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #4caf50;
+    color: white;
+    cursor: pointer;
+    margin-bottom: 1rem;
+  }
+  #status {
+    margin-bottom: 1rem;
+  }
+  #result {
+    font-size: 1.4rem;
+    background: #333;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 600px;
+    min-height: 80px;
+  }
+</style>
+</head>
+<body>
+  <h1>Speech Recognition Test</h1>
+  <button id="startStopBtn">Start Listening</button>
+  <div id="status">Click the button to start speech recognition.</div>
+  <div id="result" aria-live="polite" aria-atomic="true"></div>
+<script>
+  let recognizing = false;
+  let recognition;
+  const startStopBtn = document.getElementById('startStopBtn');
+  const statusDiv = document.getElementById('status');
+  const resultDiv = document.getElementById('result');
+
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    statusDiv.textContent = "Speech recognition is not supported by this browser.";
+    startStopBtn.disabled = true;
+  } else {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      recognizing = true;
+      statusDiv.textContent = 'Listening... Speak now.';
+      startStopBtn.textContent = 'Stop Listening';
+    };
+
+    recognition.onend = () => {
+      recognizing = false;
+      statusDiv.textContent = 'Click the button to start speech recognition.';
+      startStopBtn.textContent = 'Start Listening';
+    };
+
+    recognition.onerror = (event) => {
+      statusDiv.textContent = 'Error: ' + event.error;
+    };
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      resultDiv.textContent = transcript;
+    };
+  }
+
+  startStopBtn.addEventListener('click', () => {
+    if (recognizing) {
+      recognition.stop();
+    } else {
+      resultDiv.textContent = '';
+      recognition.start();
+    }
+  });
+</script>
+</body>
+</html>
+
